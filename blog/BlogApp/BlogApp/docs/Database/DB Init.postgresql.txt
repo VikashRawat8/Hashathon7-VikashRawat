@@ -1,0 +1,182 @@
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer
+-- SQLINES DEMO *** ------------------------------------
+CREATE SCHEMA IF NOT EXISTS tech_explorer;
+SET SCHEMA 'tech_explorer' ;
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer`.`user`
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE tech_explorer.user_seq;
+
+CREATE TABLE IF NOT EXISTS tech_explorer.user (
+  user_id BIGINT CHECK (user_id > 0) NOT NULL DEFAULT NEXTVAL ('tech_explorer.user_seq'),
+  name VARCHAR(258) NOT NULL,
+  PRIMARY KEY (user_id),
+  CONSTRAINT user_id_UNIQUE UNIQUE (user_id));
+
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer`.`post`
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE tech_explorer.post_seq;
+
+CREATE TABLE IF NOT EXISTS tech_explorer.post (
+  post_id BIGINT CHECK (post_id > 0) NOT NULL DEFAULT NEXTVAL ('tech_explorer.post_seq'),
+  title VARCHAR(258) NULL,
+  content MEDIUMTEXT NULL,
+  author BIGINT NOT NULL,
+  PRIMARY KEY (post_id)
+  CREATE INDEX fk_post_user_idx ON tech_explorer.post (author ASC) VISIBLE,
+  CONSTRAINT fk_post_user
+    FOREIGN KEY (author)
+    REFERENCES `tech_explorer`.`user` (user_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+;
+
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer`.`comment`
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE tech_explorer.comment_seq;
+
+CREATE TABLE IF NOT EXISTS tech_explorer.comment (
+  comment_id BIGINT CHECK (comment_id > 0) NOT NULL DEFAULT NEXTVAL ('tech_explorer.comment_seq'),
+  comment TEXT NOT NULL,
+  author BIGINT CHECK (author > 0) NOT NULL,
+  commented_on BIGINT CHECK (commented_on > 0) NOT NULL,
+  public SMALLINT NULL DEFAULT 1,
+  anonymous SMALLINT NULL DEFAULT 0,
+  PRIMARY KEY (comment_id)
+  CREATE INDEX fk_comment_user1_idx ON tech_explorer.comment (author ASC) VISIBLE,
+  UNIQUE INDEX comment_id_UNIQUE (comment_id ASC) VISIBLE,
+  INDEX fk_comment_post1_idx (commented_on ASC) VISIBLE,
+  CONSTRAINT fk_comment_user1
+    FOREIGN KEY (author)
+    REFERENCES `tech_explorer`.`user` (user_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_comment_post1
+    FOREIGN KEY (commented_on)
+    REFERENCES `tech_explorer`.`post` (post_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+;
+
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer`.`commented_hierarchy`
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE TABLE IF NOT EXISTS tech_explorer.commented_hierarchy (
+  comment_id BIGINT CHECK (comment_id > 0) NOT NULL,
+  immediate_parent BIGINT CHECK (immediate_parent > 0) NOT NULL ,
+  super_parent BIGINT CHECK (super_parent > 0) NOT NULL 
+  CREATE INDEX fk_commented_on_comment1_idx ON tech_explorer.commented_hierarchy (comment_id ASC) VISIBLE,
+  PRIMARY KEY (comment_id),
+  UNIQUE INDEX comment_id_UNIQUE (comment_id ASC) VISIBLE,
+  INDEX fk_commented_on_comment2_idx (immediate_parent ASC) VISIBLE,
+  INDEX fk_commented_on_comment3_idx (super_parent ASC) VISIBLE,
+  CONSTRAINT fk_commented_on_comment1
+    FOREIGN KEY (comment_id)
+    REFERENCES `tech_explorer`.`comment` (comment_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_commented_on_comment2
+    FOREIGN KEY (immediate_parent)
+    REFERENCES `tech_explorer`.`comment` (comment_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_commented_on_comment3
+    FOREIGN KEY (super_parent)
+    REFERENCES `tech_explorer`.`comment` (comment_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+;
+
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer`.`like`
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE tech_explorer.like_seq;
+
+CREATE TABLE IF NOT EXISTS tech_explorer.like (
+  like_id BIGINT CHECK (like_id > 0) NOT NULL DEFAULT NEXTVAL ('tech_explorer.like_seq'),
+  on_post BIGINT CHECK (on_post > 0) NULL,
+  on_comment BIGINT CHECK (on_comment > 0) NULL,
+  liked_by BIGINT CHECK (liked_by > 0) NOT NULL,
+  PRIMARY KEY (like_id)
+  CREATE INDEX fk_like_post1_idx ON tech_explorer.like (on_post ASC) VISIBLE,
+  INDEX fk_like_comment1_idx (on_comment ASC) VISIBLE,
+  INDEX fk_like_user1_idx (liked_by ASC) VISIBLE,
+  CONSTRAINT fk_like_post1
+    FOREIGN KEY (on_post)
+    REFERENCES `tech_explorer`.`post` (post_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_like_comment1
+    FOREIGN KEY (on_comment)
+    REFERENCES `tech_explorer`.`comment` (comment_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_like_user1
+    FOREIGN KEY (liked_by)
+    REFERENCES `tech_explorer`.`user` (user_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+;
+
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer`.`suggestion`
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE tech_explorer.suggestion_seq;
+
+CREATE TABLE IF NOT EXISTS tech_explorer.suggestion (
+  suggestion_id BIGINT CHECK (suggestion_id > 0) NOT NULL DEFAULT NEXTVAL ('tech_explorer.suggestion_seq'),
+  comment BIGINT CHECK (comment > 0) NOT NULL,
+  status VARCHAR(66) NOT NULL ,
+  PRIMARY KEY (suggestion_id)
+  CREATE INDEX fk_suggestion_comment1_idx ON tech_explorer.suggestion (comment ASC) VISIBLE,
+  CONSTRAINT fk_suggestion_comment1
+    FOREIGN KEY (comment)
+    REFERENCES `tech_explorer`.`comment` (comment_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+;
+
+
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES DEMO *** rer`.`review`
+-- SQLINES DEMO *** ------------------------------------
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE tech_explorer.review_seq;
+
+CREATE TABLE IF NOT EXISTS tech_explorer.review (
+  review_id BIGINT CHECK (review_id > 0) NOT NULL DEFAULT NEXTVAL ('tech_explorer.review_seq'),
+  post BIGINT CHECK (post > 0) NOT NULL,
+  reviewcol VARCHAR(66) NULL,
+  success SMALLINT NOT NULL DEFAULT 0 ,
+  status VARCHAR(66) NOT NULL,
+  related_comment BIGINT CHECK (related_comment > 0) NOT NULL ,
+  PRIMARY KEY (review_id)
+  CREATE INDEX fk_review_post1_idx ON tech_explorer.review (post ASC) VISIBLE,
+  INDEX fk_review_comment1_idx (related_comment ASC) VISIBLE,
+  CONSTRAINT fk_review_post1
+    FOREIGN KEY (post)
+    REFERENCES `tech_explorer`.`post` (post_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_review_comment1
+    FOREIGN KEY (related_comment)
+    REFERENCES `tech_explorer`.`comment` (comment_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+;

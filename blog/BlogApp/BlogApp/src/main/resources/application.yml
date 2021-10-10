@@ -1,0 +1,14 @@
+spring:
+  port: 8080
+  datasource:
+    url: jdbc:postgresql://localhost:5431/tech_explorer
+    username: temp2
+    password: docker
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
